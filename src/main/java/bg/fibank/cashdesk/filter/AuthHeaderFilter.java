@@ -12,6 +12,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+import static java.util.Objects.isNull;
+
 /**
  * Servlet filter that enforces API-key authentication on every request.
  *
@@ -21,7 +23,7 @@ import java.io.IOException;
  * response and are not forwarded to any controller.</p>
  *
  * <p>This filter is registered only for {@code /api/**} patterns by
- * {@link com.example.cashdesk.config.SecurityConfig}, so actuator endpoints
+ * {@link bg.fibank.cashdesk.config.SecurityConfig}, so actuator endpoints
  * (if added later) are not affected.</p>
  */
 @Slf4j
@@ -43,7 +45,7 @@ public class AuthHeaderFilter extends OncePerRequestFilter {
         String provided = request.getHeader(AUTH_HEADER_NAME);
         String expected = appProperties.getAuth().getApiKey();
 
-        if (provided == null) {
+        if (isNull(provided)) {
             log.warn("AUTH | REJECTED | uri={} | reason=missing {} header | remote={}",
                     request.getRequestURI(), AUTH_HEADER_NAME, request.getRemoteAddr());
             writeUnauthorized(response, "Missing required header: " + AUTH_HEADER_NAME);
@@ -61,8 +63,6 @@ public class AuthHeaderFilter extends OncePerRequestFilter {
                 request.getRequestURI(), request.getRemoteAddr());
         filterChain.doFilter(request, response);
     }
-
-    // ── helpers ────────────────────────────────────────────────────────────────
 
     private void writeUnauthorized(HttpServletResponse response, String message) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

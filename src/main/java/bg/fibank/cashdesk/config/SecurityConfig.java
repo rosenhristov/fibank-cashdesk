@@ -25,14 +25,13 @@ public class SecurityConfig {
      * <p>Order 1 ensures it runs before any other custom filters added in later phases.</p>
      */
     @Bean
-    public FilterRegistrationBean<AuthHeaderFilter> authHeaderFilterRegistration(
-            AuthHeaderFilter authHeaderFilter) {
-
+    public FilterRegistrationBean<AuthHeaderFilter> authHeaderFilterRegistration(AuthHeaderFilter authHeaderFilter) {
         FilterRegistrationBean<AuthHeaderFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(authHeaderFilter);
         registration.addUrlPatterns("/api/*");
         registration.setName("authHeaderFilter");
         registration.setOrder(1);
+
         return registration;
     }
 }
