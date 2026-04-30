@@ -26,8 +26,6 @@ class FileFormatTest {
     private static final LocalDateTime TS =
             LocalDateTime.of(2025, 4, 29, 10, 0, 0);
 
-    // ── isSkippable ───────────────────────────────────────────────────────────
-
     @Nested
     @DisplayName("isSkippable()")
     class IsSkippable {
@@ -56,7 +54,6 @@ class FileFormatTest {
         }
     }
 
-    // ── balance file codec ────────────────────────────────────────────────────
 
     @Nested
     @DisplayName("Balance file codec")
@@ -139,7 +136,6 @@ class FileFormatTest {
         }
     }
 
-    // ── transaction file codec ────────────────────────────────────────────────
 
     @Nested
     @DisplayName("Transaction file codec")
@@ -239,7 +235,6 @@ class FileFormatTest {
         }
     }
 
-    // ── timestamp format ──────────────────────────────────────────────────────
 
     @Nested
     @DisplayName("Timestamp format")
@@ -269,7 +264,6 @@ class FileFormatTest {
         }
     }
 
-    // ── header constants ──────────────────────────────────────────────────────
 
     @Nested
     @DisplayName("Header constants")
