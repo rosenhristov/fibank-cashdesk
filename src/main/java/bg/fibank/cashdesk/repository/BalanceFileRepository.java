@@ -68,7 +68,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 
         @PostConstruct
-        void init() throws IOException {
+        public void init() throws IOException {
             balancesPath = Path.of(appProperties.getData().getBalancesFile());
             balancesTmpPath = balancesPath.resolveSibling(balancesPath.getFileName() + ".tmp");
 
