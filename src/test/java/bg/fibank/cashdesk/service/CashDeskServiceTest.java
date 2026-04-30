@@ -1,7 +1,6 @@
 package bg.fibank.cashdesk.service;
 
-import bg.fibank.cashdesk.dto.CashOperationRequest;
-import bg.fibank.cashdesk.dto.CashOperationResponse;
+import bg.fibank.cashdesk.dto.*;
 import bg.fibank.cashdesk.exception.CashierNotFoundException;
 import bg.fibank.cashdesk.model.*;
 import bg.fibank.cashdesk.repository.BalanceFileRepository;
@@ -57,7 +56,7 @@ class CashDeskServiceTest {
                 .operationType(OperationType.DEPOSIT)
                 .currency(Currency.BGN)
                 .amount(BigDecimal.valueOf(600))
-                .denominations(List.of(new Denomination(10, 10), new Denomination(50, 10)))
+                .denominations(List.of(new DenominationDto(10, 10), new DenominationDto(50, 10)))
                 .build();
 
         // Act
@@ -65,7 +64,7 @@ class CashDeskServiceTest {
 
         // Assert
         assertThat(response.getCashierName()).isEqualTo("MARTINA");
-        assertThat(response.getTotals().get(Currency.BGN)).isEqualTo(1000 + 100 + 500); // 1600
+        assertThat(response.getUpdatedBalance()).isEqualTo(1000 + 100 + 500); // 1600
         
         verify(balanceFileRepository).save(martina);
         
@@ -87,14 +86,14 @@ class CashDeskServiceTest {
                 .operationType(OperationType.WITHDRAWAL)
                 .currency(Currency.BGN)
                 .amount(BigDecimal.valueOf(100))
-                .denominations(List.of(new Denomination(10, 5), new Denomination(50, 1)))
+                .denominations(List.of(new DenominationDto(10, 5), new DenominationDto(50, 1)))
                 .build();
 
         // Act
         CashOperationResponse response = cashDeskService.performOperation(request);
 
         // Assert
-        assertThat(response.getTotals().get(Currency.BGN)).isEqualTo(1000 - 100); // 900
+        assertThat(response.getUpdatedBalance()).isEqualTo(1000 - 100); // 900
         verify(balanceFileRepository).save(martina);
         verify(transactionFileRepository).append(any());
     }
@@ -109,7 +108,7 @@ class CashDeskServiceTest {
                 .operationType(OperationType.WITHDRAWAL)
                 .currency(Currency.BGN)
                 .amount(BigDecimal.valueOf(20))
-                .denominations(List.of(new Denomination(20, 1))) // 20 BGN not in Martina's balance
+                .denominations(List.of(new DenominationDto(20, 1))) // 20 BGN not in Martina's balance
                 .build();
 
         // Act & Assert
@@ -128,7 +127,7 @@ class CashDeskServiceTest {
         CashOperationRequest request = CashOperationRequest.builder()
                 .cashierName("UNKNOWN")
                 .amount(BigDecimal.TEN)
-                .denominations(List.of(new Denomination(10, 1)))
+                .denominations(List.of(new DenominationDto(10, 1)))
                 .build();
 
         // Act & Assert
@@ -146,7 +145,7 @@ class CashDeskServiceTest {
                 .operationType(OperationType.DEPOSIT)
                 .currency(Currency.BGN)
                 .amount(BigDecimal.valueOf(100))
-                .denominations(List.of(new Denomination(10, 5))) // Total is 50, but request says 100
+                .denominations(List.of(new DenominationDto(10, 5))) // Total is 50, but request says 100
                 .build();
 
         // Act & Assert
@@ -163,27 +162,23 @@ class CashDeskServiceTest {
         when(balanceFileRepository.findAll()).thenReturn(List.of(martina, peter));
         
         // Act
-        List<CashOperationResponse> result = cashDeskService.getBalances(null, null, null);
+        CashBalanceResponse result = cashDeskService.getBalances(new CashBalanceRequest(null, null, null));
 
         // Assert
-        assertThat(result).hasSize(2);
-        verify(transactionFileRepository, times(2)).findAll(anyString(), any(), any());
+        assertThat(result.getCashiers()).hasSize(2);
     }
 
     @Test
-    @DisplayName("getBalances: returns specific cashier with history filter")
+    @DisplayName("getBalances: returns specific cashier")
     void getBalances_Filtered_Success() {
         // Arrange
         when(balanceFileRepository.findByCashier("MARTINA")).thenReturn(Optional.of(martina));
-        LocalDate from = LocalDate.of(2025, 1, 1);
-        LocalDate to = LocalDate.of(2025, 12, 31);
         
         // Act
-        List<CashOperationResponse> result = cashDeskService.getBalances("MARTINA", from, to);
+        CashBalanceResponse result = cashDeskService.getBalances(new CashBalanceRequest("MARTINA", null, null));
 
         // Assert
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getCashierName()).isEqualTo("MARTINA");
-        verify(transactionFileRepository).findAll("MARTINA", from, to);
+        assertThat(result.getCashiers()).hasSize(1);
+        assertThat(result.getCashiers().get(0).getCashierName()).isEqualTo("MARTINA");
     }
 }

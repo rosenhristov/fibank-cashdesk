@@ -1,7 +1,6 @@
 package bg.fibank.cashdesk.service;
 
-import bg.fibank.cashdesk.dto.CashOperationRequest;
-import bg.fibank.cashdesk.dto.CashOperationResponse;
+import bg.fibank.cashdesk.dto.*;
 import bg.fibank.cashdesk.exception.CashierNotFoundException;
 import bg.fibank.cashdesk.exception.InvalidOperationException;
 import bg.fibank.cashdesk.model.*;
@@ -20,6 +19,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,13 +33,16 @@ public class CashDeskService {
 
     public CashOperationResponse performOperation(CashOperationRequest request) {
         String cashierName = request.getCashierName().toUpperCase();
-        
+
         synchronized (getLock(cashierName)) {
             CashierBalance balance = balanceFileRepository.findByCashier(cashierName)
                     .orElseThrow(() -> new CashierNotFoundException(cashierName));
 
-            List<Denomination> denoms = request.getDenominations();
-            int calculatedAmount = denoms.stream().mapToInt(Denomination::total).sum();
+            List<Denomination> domainDenoms = request.getDenominations().stream()
+                    .map(d -> new Denomination(d.getFaceValue(), d.getCount()))
+                    .toList();
+
+            int calculatedAmount = domainDenoms.stream().mapToInt(Denomination::total).sum();
 
             if (request.getAmount().compareTo(BigDecimal.valueOf(calculatedAmount)) != 0) {
                 throw new InvalidOperationException(String.format(
@@ -48,9 +51,9 @@ public class CashDeskService {
             }
 
             if (request.getOperationType() == OperationType.WITHDRAWAL) {
-                balance.subtractDenominations(request.getCurrency(), denoms);
+                balance.subtractDenominations(request.getCurrency(), domainDenoms);
             } else {
-                balance.addDenominations(request.getCurrency(), denoms);
+                balance.addDenominations(request.getCurrency(), domainDenoms);
             }
 
             try {
@@ -64,7 +67,7 @@ public class CashDeskService {
                     request.getOperationType(),
                     request.getCurrency(),
                     calculatedAmount,
-                    request.getDenominations(),
+                    domainDenoms,
                     LocalDateTime.now()
             );
             transactionFileRepository.append(tx);
@@ -72,11 +75,22 @@ public class CashDeskService {
             log.info("OPERATION | cashier={} type={} currency={} amount={}",
                     cashierName, request.getOperationType(), request.getCurrency(), calculatedAmount);
 
-            return buildResponse(balance, null);
+            return CashOperationResponse.builder()
+                    .cashierName(balance.getCashierName())
+                    .currency(request.getCurrency())
+                    .updatedBalance(balance.getTotalForCurrency(request.getCurrency()))
+                    .denominations(balance.getDenominationsForCurrency(request.getCurrency()).stream()
+                            .map(d -> new DenominationDto(d.getFaceValue(), d.getCount()))
+                            .toList())
+                    .build();
         }
     }
 
-    public List<CashOperationResponse> getBalances(String cashier, LocalDate dateFrom, LocalDate dateTo) {
+    public CashBalanceResponse getBalances(CashBalanceRequest request) {
+        String cashier = request.getCashier();
+        LocalDate dateFrom = request.getDateFrom();
+        LocalDate dateTo = request.getDateTo();
+
         log.info("QUERY | cashier={} dateFrom={} dateTo={}", cashier, dateFrom, dateTo);
 
         List<CashierBalance> balances;
@@ -89,29 +103,25 @@ public class CashDeskService {
             balances = balanceFileRepository.findAll();
         }
 
-        return balances.stream()
-                .map(b -> {
-                    List<Transaction> history = transactionFileRepository.findAll(b.getCashierName(), dateFrom, dateTo);
-                    return buildResponse(b, history);
-                })
+        List<CashierBalanceEntry> entries = balances.stream()
+                .map(this::mapToEntry)
                 .toList();
+
+        return new CashBalanceResponse(entries);
     }
 
-    private CashOperationResponse buildResponse(CashierBalance balance, List<Transaction> history) {
+    private CashierBalanceEntry mapToEntry(CashierBalance balance) {
         Map<Currency, Integer> totals = new EnumMap<>(Currency.class);
-        Map<Currency, List<Denomination>> denoms = new EnumMap<>(Currency.class);
+        Map<Currency, List<DenominationDto>> denoms = new EnumMap<>(Currency.class);
 
         for (Currency cur : Currency.values()) {
             totals.put(cur, balance.getTotalForCurrency(cur));
-            denoms.put(cur, balance.getDenominationsForCurrency(cur));
+            denoms.put(cur, balance.getDenominationsForCurrency(cur).stream()
+                    .map(d -> new DenominationDto(d.getFaceValue(), d.getCount()))
+                    .toList());
         }
 
-        return CashOperationResponse.builder()
-                .cashierName(balance.getCashierName())
-                .totals(totals)
-                .denominations(denoms)
-                .history(history)
-                .build();
+        return new CashierBalanceEntry(balance.getCashierName(), totals, denoms);
     }
 
     private Object getLock(String cashierName) {

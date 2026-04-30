@@ -37,6 +37,6 @@ public class CashOperationRequest {
 
     @NotEmpty(message = "At least one denomination must be provided")
     @Valid
-    private List<Denomination> denominations;
+    private List<DenominationDto> denominations;
 
 }

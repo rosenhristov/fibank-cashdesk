@@ -2,21 +2,17 @@ package bg.fibank.cashdesk.dto;
 
 import bg.fibank.cashdesk.model.Currency;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CashOperationResponse {
-
+public class CashierBalanceEntry {
     private String cashierName;
-    private Currency currency;
-    private int updatedBalance;
-    private List<DenominationDto> denominations;
-
+    private Map<Currency, Integer> totals;
+    private Map<Currency, List<DenominationDto>> denominations;
 }
