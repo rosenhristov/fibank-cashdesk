@@ -132,10 +132,11 @@ public class FileFormat {
      */
     public static String encodeBalanceLine(String cashierName, Currency currency,
                                            Denomination denomination) {
-        return cashierName
-                + DELIMITER + currency.name()
-                + DELIMITER + denomination.getFaceValue()
-                + DELIMITER + denomination.getCount();
+        return new StringBuilder(cashierName)
+                .append(DELIMITER).append(currency.name())
+                .append(DELIMITER).append( denomination.getFaceValue())
+                .append(DELIMITER).append(denomination.getCount())
+                .toString();
     }
 
     /**
@@ -191,12 +192,13 @@ public class FileFormat {
      * @return a single pipe-delimited line, no trailing newline
      */
     public static String encodeTransactionLine(Transaction tx) {
-        return tx.timestamp().format(TIMESTAMP_FORMATTER)
-                + DELIMITER + tx.cashierName()
-                + DELIMITER + tx.operationType().name()
-                + DELIMITER + tx.currency().name()
-                + DELIMITER + tx.amount()
-                + DELIMITER + tx.denominationsAsString();
+        return new StringBuilder(tx.timestamp().format(TIMESTAMP_FORMATTER))
+                .append(DELIMITER).append(tx.cashierName())
+                .append(DELIMITER).append(tx.operationType().name())
+                .append(DELIMITER).append(tx.currency().name())
+                .append(DELIMITER).append(tx.amount())
+                .append(DELIMITER).append(tx.denominationsAsString())
+                .toString();
     }
 
     /**
