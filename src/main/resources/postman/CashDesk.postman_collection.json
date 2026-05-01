@@ -1,0 +1,329 @@
+{
+  "info": {
+    "_postman_id": "cash-desk-col-001",
+    "name": "Cash Desk Module",
+    "description": "All API requests for the Cash Desk Module.\n\nAuthentication: every request includes the `FIB-X-AUTH` header via a collection-level pre-request script sourced from the `Cash Desk — Local` environment.\n\nRun order for the spec scenario:\n1. Deposit BGN 600 — MARTINA\n2. Deposit EUR 200 — MARTINA\n3. Withdrawal BGN 100 — MARTINA\n4. Withdrawal EUR 500 — MARTINA\n5. Balance — All cashiers\n6. Balance — MARTINA only\n7. Balance — Date range filter",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": null,
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Automatically attach the API key header to every request in this collection.",
+          "pm.request.headers.upsert({",
+          "    key: 'FIB-X-AUTH',",
+          "    value: pm.environment.get('apiKey')",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Cash Operations",
+      "item": [
+        {
+          "name": "1. Deposit BGN 600 — MARTINA",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cashierName\": \"MARTINA\",\n  \"operationType\": \"DEPOSIT\",\n  \"currency\": \"BGN\",\n  \"amount\": 600,\n  \"denominations\": [\n    { \"faceValue\": 10, \"count\": 10 },\n    { \"faceValue\": 50, \"count\": 10 }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/cash-operation",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "cash-operation"]
+            },
+            "description": "Deposit 600 BGN into MARTINA's till.\n\nDenomination breakdown:\n- 10 × 10-BGN notes = 100 BGN\n- 10 × 50-BGN notes = 500 BGN\n- Total: 600 BGN\n\nExpected new BGN balance: 1000 + 600 = 1600"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('cashierName is MARTINA', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.cashierName).to.eql('MARTINA');",
+                  "});",
+                  "pm.test('newBalance is 1600', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.newBalance).to.eql(1600);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "2. Deposit EUR 200 — MARTINA",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cashierName\": \"MARTINA\",\n  \"operationType\": \"DEPOSIT\",\n  \"currency\": \"EUR\",\n  \"amount\": 200,\n  \"denominations\": [\n    { \"faceValue\": 20, \"count\": 5 },\n    { \"faceValue\": 50, \"count\": 2 }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/cash-operation",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "cash-operation"]
+            },
+            "description": "Deposit 200 EUR into MARTINA's till.\n\nDenomination breakdown:\n- 5 × 20-EUR notes = 100 EUR\n- 2 × 50-EUR notes = 100 EUR\n- Total: 200 EUR\n\nExpected new EUR balance: 2000 + 200 = 2200"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('newBalance is 2200', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.newBalance).to.eql(2200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "3. Withdrawal BGN 100 — MARTINA",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cashierName\": \"MARTINA\",\n  \"operationType\": \"WITHDRAWAL\",\n  \"currency\": \"BGN\",\n  \"amount\": 100,\n  \"denominations\": [\n    { \"faceValue\": 10, \"count\": 5 },\n    { \"faceValue\": 50, \"count\": 1 }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/cash-operation",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "cash-operation"]
+            },
+            "description": "Withdraw 100 BGN from MARTINA's till.\n\nDenomination breakdown:\n- 5 × 10-BGN notes = 50 BGN\n- 1 × 50-BGN note  = 50 BGN\n- Total: 100 BGN\n\nExpected new BGN balance: 1600 - 100 = 1500"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('newBalance is 1500', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.newBalance).to.eql(1500);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "4. Withdrawal EUR 500 — MARTINA",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cashierName\": \"MARTINA\",\n  \"operationType\": \"WITHDRAWAL\",\n  \"currency\": \"EUR\",\n  \"amount\": 500,\n  \"denominations\": [\n    { \"faceValue\": 50, \"count\": 10 }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/cash-operation",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "cash-operation"]
+            },
+            "description": "Withdraw 500 EUR from MARTINA's till.\n\nDenomination breakdown:\n- 10 × 50-EUR notes = 500 EUR\n- Total: 500 EUR\n\nExpected new EUR balance: 2200 - 500 = 1700"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('newBalance is 1700', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.newBalance).to.eql(1700);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cash Balance",
+      "item": [
+        {
+          "name": "5. Balance — All cashiers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/cash-balance",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "cash-balance"]
+            },
+            "description": "Retrieve current balances for all three cashiers.\n\nExpected balances after running requests 1–4:\n- MARTINA: BGN=1500, EUR=1700\n- PETER:   BGN=1000, EUR=2000\n- LINDA:   BGN=1000, EUR=2000"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Three cashiers returned', () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.cashiers.length).to.eql(3);",
+                  "});",
+                  "pm.test('MARTINA BGN is 1500', () => {",
+                  "    const martina = pm.response.json().cashiers.find(c => c.cashierName === 'MARTINA');",
+                  "    pm.expect(martina.bgn.total).to.eql(1500);",
+                  "});",
+                  "pm.test('MARTINA EUR is 1700', () => {",
+                  "    const martina = pm.response.json().cashiers.find(c => c.cashierName === 'MARTINA');",
+                  "    pm.expect(martina.eur.total).to.eql(1700);",
+                  "});",
+                  "pm.test('PETER BGN is 1000 (untouched)', () => {",
+                  "    const peter = pm.response.json().cashiers.find(c => c.cashierName === 'PETER');",
+                  "    pm.expect(peter.bgn.total).to.eql(1000);",
+                  "});",
+                  "pm.test('LINDA EUR is 2000 (untouched)', () => {",
+                  "    const linda = pm.response.json().cashiers.find(c => c.cashierName === 'LINDA');",
+                  "    pm.expect(linda.eur.total).to.eql(2000);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "6. Balance — MARTINA only",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/cash-balance?cashier=MARTINA",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "cash-balance"],
+              "query": [
+                { "key": "cashier", "value": "MARTINA" }
+              ]
+            },
+            "description": "Retrieve balance for MARTINA only using the cashier filter.\n\nExpected after running requests 1–4:\n- BGN total: 1500\n- EUR total: 1700\n- BGN denominations: 10×55, 50×19\n- EUR denominations: 10×100, 20×5, 50×12"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Exactly one cashier returned', () => {",
+                  "    pm.expect(pm.response.json().cashiers.length).to.eql(1);",
+                  "});",
+                  "pm.test('Cashier is MARTINA', () => {",
+                  "    pm.expect(pm.response.json().cashiers[0].cashierName).to.eql('MARTINA');",
+                  "});",
+                  "pm.test('BGN total is 1500', () => {",
+                  "    pm.expect(pm.response.json().cashiers[0].bgn.total).to.eql(1500);",
+                  "});",
+                  "pm.test('EUR total is 1700', () => {",
+                  "    pm.expect(pm.response.json().cashiers[0].eur.total).to.eql(1700);",
+                  "});",
+                  "pm.test('BGN has 10-note denomination', () => {",
+                  "    const denoms = pm.response.json().cashiers[0].bgn.denominations;",
+                  "    const ten = denoms.find(d => d.faceValue === 10);",
+                  "    pm.expect(ten).to.exist;",
+                  "    pm.expect(ten.count).to.eql(55);",
+                  "});",
+                  "pm.test('BGN has 50-note denomination', () => {",
+                  "    const denoms = pm.response.json().cashiers[0].bgn.denominations;",
+                  "    const fifty = denoms.find(d => d.faceValue === 50);",
+                  "    pm.expect(fifty).to.exist;",
+                  "    pm.expect(fifty.count).to.eql(19);",
+                  "});",
+                  "pm.test('EUR has 20-note denomination (from deposit)', () => {",
+                  "    const denoms = pm.response.json().cashiers[0].eur.denominations;",
+                  "    const twenty = denoms.find(d => d.faceValue === 20);",
+                  "    pm.expect(twenty).to.exist;",
+                  "    pm.expect(twenty.count).to.eql(5);",
+                  "});",
+                  "pm.test('EUR has 50-note denomination with count 12', () => {",
+                  "    const denoms = pm.response.json().cashiers[0].eur.denominations;",
+                  "    const fifty = denoms.find(d => d.faceValue === 50);",
+                  "    pm.expect(fifty).to.exist;",
+                  "    pm.expect(fifty.count).to.eql(12);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "7. Balance — Date range filter",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/cash-balance?dateFrom=2025-01-01&dateTo=2025-12-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "cash-balance"],
+              "query": [
+                { "key": "dateFrom", "value": "2025-01-01" },
+                { "key": "dateTo",   "value": "2025-12-31" }
+              ]
+            },
+            "description": "Retrieve balances filtered by date range. The current live balances are always returned; the date parameters are echoed back in the response and are used to filter the transaction history if transaction-level detail is requested."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('dateFrom is echoed in response', () => {",
+                  "    pm.expect(pm.response.json().dateFrom).to.eql('2025-01-01');",
+                  "});",
+                  "pm.test('dateTo is echoed in response', () => {",
+                  "    pm.expect(pm.response.json().dateTo).to.eql('2025-12-31');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": []
+}
