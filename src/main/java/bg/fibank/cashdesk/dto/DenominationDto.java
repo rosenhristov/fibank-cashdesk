@@ -20,5 +20,8 @@ public record DenominationDto(
 
         @Min(value = 1, message = "count must be at least 1")
         int count
-) {}
+) {
+
+}
+
 

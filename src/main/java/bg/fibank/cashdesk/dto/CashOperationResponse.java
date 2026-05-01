@@ -19,9 +19,12 @@ import java.util.List;
  * @param denominations updated denomination breakdown for {@link #currency}
  */
 public record CashOperationResponse(
+
         String cashierName,
         OperationType operationType,
         Currency currency,
         int newBalance,
-        List<DenominationDto> denominations
-) {}
+        List<DenominationDto> denominations) {
+
+}
+

@@ -9,6 +9,9 @@ import java.util.List;
  * @param denominations denomination slots sorted ascending by face value
  */
 public record CurrencyBalanceDto(
+
         int total,
-        List<DenominationDto> denominations
-) {}
+        List<DenominationDto> denominations) {
+
+}
+

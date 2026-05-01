@@ -16,8 +16,10 @@ import java.time.LocalDate;
  * @param cashier   the cashier filter that was applied, or {@code null}
  */
 public record CashBalanceResponse(
+
         List<CashierBalanceDto> cashiers,
         String cashier,
         LocalDate dateFrom,
-        LocalDate dateTo
-) {}
+        LocalDate dateTo) {
+
+}

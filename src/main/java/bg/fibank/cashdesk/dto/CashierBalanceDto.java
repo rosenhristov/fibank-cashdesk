@@ -9,7 +9,10 @@ package bg.fibank.cashdesk.dto;
  * @param eur         live EUR balance with denominations
  */
 public record CashierBalanceDto(
+
         String cashierName,
         CurrencyBalanceDto bgn,
-        CurrencyBalanceDto eur
-) {}
+        CurrencyBalanceDto eur) {
+
+}
+
