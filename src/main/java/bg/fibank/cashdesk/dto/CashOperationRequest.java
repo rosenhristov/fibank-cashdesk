@@ -1,42 +1,44 @@
 package bg.fibank.cashdesk.dto;
 
 import bg.fibank.cashdesk.model.Currency;
-import bg.fibank.cashdesk.model.Denomination;
 import bg.fibank.cashdesk.model.OperationType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.util.List;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CashOperationRequest {
+/**
+ * Request body for {@code POST /api/v1/cash-operation}.
+ *
+ * <p>A single endpoint handles both deposits and withdrawals; the
+ * {@link #operationType} field distinguishes them. Validation annotations
+ * are enforced by {@code @Valid} on the controller parameter (Phase 7).</p>
+ *
+ * @param cashierName   name of the cashier performing the operation
+ * @param operationType DEPOSIT or WITHDRAWAL
+ * @param currency      BGN or EUR
+ * @param amount        total monetary amount; must equal the sum of
+ *                      {@code faceValue × count} across all {@link #denominations}
+ * @param denominations breakdown of bills involved in the operation
+ */
+public record CashOperationRequest(
 
-    @NotBlank(message = "Cashier name is required")
-    private String cashierName;
+        @NotBlank(message = "cashierName must not be blank")
+        String cashierName,
 
-    @NotNull(message = "Operation type is required")
-    private OperationType operationType;
+        @NotNull(message = "operationType must not be null (DEPOSIT or WITHDRAWAL)")
+        OperationType operationType,
 
-    @NotNull(message = "Currency is required")
-    private Currency currency;
+        @NotNull(message = "currency must not be null (BGN or EUR)")
+        Currency currency,
 
-    @NotNull(message = "Amount is required")
-    @Positive(message = "Amount must be positive")
-    private BigDecimal amount;
+        @Positive(message = "amount must be a positive integer")
+        int amount,
 
-    @NotEmpty(message = "At least one denomination must be provided")
-    @Valid
-    private List<DenominationDto> denominations;
-
-}
+        @NotEmpty(message = "denominations must not be empty")
+        @Valid
+        List<DenominationDto> denominations
+) {}

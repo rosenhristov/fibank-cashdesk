@@ -51,7 +51,7 @@ public class TransactionFileRepository {
     // ── lifecycle ─────────────────────────────────────────────────────────────
 
     @PostConstruct
-    void init() throws IOException {
+    public void init() throws IOException {
         transactionsPath = Path.of(appProperties.getData().getTransactionsFile());
         ensureFileExists(transactionsPath);
         log.info("TRANSACTION_REPO | Initialised | file={}", transactionsPath);

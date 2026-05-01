@@ -46,7 +46,6 @@ class DataInitializerTest {
         initializer = new DataInitializer(repo);
     }
 
-    // ── seed definitions ──────────────────────────────────────────────────────
 
     @Test
     @DisplayName("SEEDS list contains exactly three cashiers in spec order")
@@ -91,7 +90,6 @@ class DataInitializerTest {
         assertThat(denominationCount(DataInitializer.STARTING_EUR, 50)).isEqualTo(20);
     }
 
-    // ── first boot ────────────────────────────────────────────────────────────
 
     @Nested
     @DisplayName("First boot — empty repository")
@@ -149,7 +147,6 @@ class DataInitializerTest {
             var denoms = balance.getDenominationsForCurrency(BGN);
 
             assertThat(denoms).hasSize(2);
-            // denominationsFor() returns sorted ascending by face value
             assertThat(denoms.get(0).getFaceValue()).isEqualTo(10);
             assertThat(denoms.get(0).getCount()).isEqualTo(50);
             assertThat(denoms.get(1).getFaceValue()).isEqualTo(50);
@@ -172,7 +169,6 @@ class DataInitializerTest {
         }
     }
 
-    // ── idempotency ───────────────────────────────────────────────────────────
 
     @Nested
     @DisplayName("Subsequent boots — idempotency")
@@ -190,15 +186,12 @@ class DataInitializerTest {
         @Test
         @DisplayName("run() does not overwrite a cashier modified after first seed")
         void run_doesNotOverwriteExistingBalance() throws Exception {
-            // First boot — seed all cashiers
             initializer.run(new DefaultApplicationArguments());
 
-            // Simulate a deposit: MARTINA receives 500 extra BGN
             CashierBalance martina = repo.findByCashier("MARTINA").orElseThrow();
             martina.addDenominations(BGN, java.util.List.of(new Denomination(50, 10)));
             repo.save(martina);
 
-            // Second boot — must not reset her balance
             initializer.run(new DefaultApplicationArguments());
 
             CashierBalance reloaded = repo.findByCashier("MARTINA").orElseThrow();
@@ -218,17 +211,14 @@ class DataInitializerTest {
                     java.util.List.of(new Denomination(10, 100), new Denomination(50, 20)));
             repo.saveInitial(martina);
 
-            // Now run the initializer
             initializer.run(new DefaultApplicationArguments());
 
-            // All three must now exist
             assertThat(repo.exists("MARTINA")).isTrue();
             assertThat(repo.exists("PETER")).isTrue();
             assertThat(repo.exists("LINDA")).isTrue();
         }
     }
 
-    // ── persistence ───────────────────────────────────────────────────────────
 
     @Nested
     @DisplayName("Persistence after seed")
@@ -239,12 +229,9 @@ class DataInitializerTest {
         void seededData_survivesRestart() throws Exception {
             initializer.run(new DefaultApplicationArguments());
 
-            // Simulate a restart: new repo instance over the same file
             AppProperties props = new AppProperties();
-            props.getData().setBalancesFile(
-                    tempDir.resolve("cash_balances.txt").toString());
-            props.getData().setTransactionsFile(
-                    tempDir.resolve("transactions.txt").toString());
+            props.getData().setBalancesFile(tempDir.resolve("cash_balances.txt").toString());
+            props.getData().setTransactionsFile(tempDir.resolve("transactions.txt").toString());
             props.getAuth().setApiKey("test-key");
 
             BalanceFileRepository freshRepo = new BalanceFileRepository(props);
@@ -259,7 +246,6 @@ class DataInitializerTest {
         }
     }
 
-    // ── helper ────────────────────────────────────────────────────────────────
 
     private int denominationCount(java.util.List<Denomination> denoms, int faceValue) {
         return denoms.stream()

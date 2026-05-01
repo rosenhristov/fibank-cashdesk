@@ -133,4 +133,3 @@ public class DataInitializer implements ApplicationRunner {
         log.info("INIT | ────────────────────────────────────────────────────────");
     }
 }
- 
