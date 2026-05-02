@@ -296,8 +296,10 @@ All configurable values are in `src/main/resources/application.properties`:
 ```properties
 server.port=8080
 
-# API key required in the FIB-X-AUTH header on every request
-app.auth.api-key=f9Uie8nNf112hx8s
+# API key required in the FIB-X-AUTH header on every request - for security reasons
+# the value of the API key should not be stored in the repo, it should be added in an environment variable
+# ${APP_AUTH_API_KEY}, used as a value of the 'app.auth.api-key' property in the application.properties file 
+app.auth.api-key=${APP_AUTH_API_KEY}
 
 # Paths to the two data files (relative to the project root)
 app.data.balances-file=src/main/resources/data/cash_balances.txt
@@ -312,7 +314,7 @@ logging.level.com.example.cashdesk=INFO
 ## Project Structure
 
 ```
-cash-desk-module/
+cashdesk/
 ├── postman/
 │   ├── CashDesk.postman_collection.json
 │   └── CashDesk.postman_environment.json
@@ -424,4 +426,4 @@ Every significant event is logged via SLF4J:
 | WARN  | Malformed lines in data files — skipped without stopping the application   |
 | ERROR | I/O failures and unexpected exceptions — includes full stack trace         |
 
-The log level is configurable via `logging.level.com.example.cashdesk` in `application.properties`.
+The log level is configurable via `logging.level.bg.fibank.cashdesk` in `application.properties`.
