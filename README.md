@@ -306,7 +306,7 @@ app.data.balances-file=src/main/resources/data/cash_balances.txt
 app.data.transactions-file=src/main/resources/data/transactions.txt
 
 # Log level for all application classes
-logging.level.com.example.cashdesk=INFO
+logging.level.bg.fibank.cashdesk=INFO
 ```
 
 ---
@@ -320,7 +320,7 @@ cashdesk/
 │   └── CashDesk.postman_environment.json
 ├── src/
 │   ├── main/
-│   │   ├── java/com/example/cashdesk/
+│   │   ├── java/bg/fibank/cashdesk/
 │   │   │   ├── CashDeskApplication.java              ← entry point
 │   │   │   ├── config/
 │   │   │   │   ├── AppProperties.java                ← typed binding for all app.* properties
@@ -368,7 +368,7 @@ cashdesk/
 │   │           ├── cash_balances.txt                 ← live balance state (rewritten atomically)
 │   │           └── transactions.txt                  ← append-only audit log
 │   └── test/
-│       └── java/com/example/cashdesk/
+│       └── java/bg/fibank/cashdesk/
 │           ├── controller/
 │           │   ├── CashBalanceControllerTest.java    ← @WebMvcTest; auth, binding, filters, errors
 │           │   └── CashOperationControllerTest.java  ← @WebMvcTest; auth, validation, domain errors
