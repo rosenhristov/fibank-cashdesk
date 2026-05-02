@@ -1,6 +1,7 @@
 # Cash Desk Module
 
-A Spring Boot 3 REST API for managing cash operations — deposits, withdrawals, and balance queries — across multiple cashiers in BGN and EUR currencies. Balances and transaction history are stored in plain pipe-delimited text files; no database is required.
+A Spring Boot 3 REST API for managing cash operations — deposits, withdrawals, and balance queries — across multiple 
+cashiers in BGN and EUR currencies. Balances and transaction history are stored in plain pipe-delimited text files; no database is required.
 
 ---
 
@@ -31,7 +32,8 @@ The server starts on **http://localhost:8080**.
 
 ### First boot
 
-On startup, `DataInitializer` checks whether the three required cashiers exist in `cash_balances.txt`. If they are absent it seeds them with the specification-mandated starting balances:
+On startup, `DataInitializer` checks whether the three required cashiers exist in `cash_balances.txt`. If they are absent
+it seeds them with the specification-mandated starting balances:
 
 | Cashier | BGN   | BGN Denominations               | EUR   | EUR Denominations                |
 |---------|-------|---------------------------------|-------|----------------------------------|
@@ -110,7 +112,8 @@ The response returns the updated state for the affected currency only.
 
 ### `GET /api/v1/cash-balance`
 
-Returns current cashier balances with denomination breakdowns. All three query parameters are optional and may be combined freely. They are bound as a `CashBalanceRequest` record via Spring MVC `@ModelAttribute`.
+Returns current cashier balances with denomination breakdowns. All three query parameters are optional and may be 
+combined freely. They are bound as a `CashBalanceRequest` record via Spring MVC `@ModelAttribute`.
 
 | Parameter  | Type   | Format       | Description                                       |
 |------------|--------|--------------|---------------------------------------------------|
@@ -230,12 +233,14 @@ The `postman/` directory contains a ready-to-use collection and environment.
 
 **Import steps:**
 
-1. Open Postman → **Import**
+1. Open Postman → **Collections** → **Import**
 2. Import `postman/CashDesk.postman_collection.json`
+3. Open Postman → **Environments** → **Import**
 3. Import `postman/CashDesk.postman_environment.json`
 4. Select **Cash Desk — Local** from the environment dropdown
 
-A collection-level pre-request script injects the `FIB-X-AUTH` header automatically on every request using `{{apiKey}}` from the environment — no per-request configuration needed.
+A collection-level pre-request script injects the `FIB-X-AUTH` header automatically on every request using `{{apiKey}}` 
+from the environment — no per-request configuration needed.
 
 **Included requests:**
 
@@ -259,7 +264,8 @@ Both files are created automatically on first boot if absent. They live in `src/
 
 ### `cash_balances.txt` — live balance state
 
-Rewritten in full after every operation via an atomic write (written to a `.tmp` file, then renamed over the original). One row per denomination slot, grouped by cashier then currency, sorted ascending by face value within each group.
+Rewritten in full after every operation via an atomic write (written to a `.tmp` file, then renamed over the original). 
+One row per denomination slot, grouped by cashier then currency, sorted ascending by face value within each group.
 
 ```
 # CASHIER|CURRENCY|FACE_VALUE|COUNT
@@ -287,9 +293,11 @@ One line appended per completed operation. Lines are never modified or deleted a
 2025-04-29T10:15:00|MARTINA|WITHDRAWAL|EUR|500|50x10
 ```
 
-The `DENOMINATIONS` column uses the format `faceValue x count` — for example, `10x10` means ten 10-unit bills (100 units total), and `50x10` means ten 50-unit bills (500 units total). Multiple denominations are comma-separated.
+The `DENOMINATIONS` column uses the format `faceValue x count` — for example, `10x10` means ten 10-unit bills 
+(100 units total), and `50x10` means ten 50-unit bills (500 units total). Multiple denominations are comma-separated.
 
-Lines beginning with `#` and blank lines are silently skipped by the parser. Malformed data lines are logged as warnings and skipped without stopping the application.
+Lines beginning with `#` and blank lines are silently skipped by the parser. Malformed data lines are logged as warnings 
+and skipped without stopping the application.
 
 ---
 
