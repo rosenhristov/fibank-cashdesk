@@ -45,13 +45,15 @@ Subsequent restarts leave all live balances completely untouched.
 
 ## Authentication
 
-Every request to `/api/**` must include the header:
+Every request to `/api/**` must include the header `FIB-X-AUTH` containing the API key for authentication, provided by 
+the team, that should be stored in an environment variable `${APP_AUTH_API_KEY}` for security reasons:
 
 ```
-FIB-X-AUTH: f9Uie8nNf112hx8s
+FIB-X-AUTH: ${APP_AUTH_API_KEY}
 ```
 
-Requests without this header, or with an incorrect value, receive `401 Unauthorized` before reaching any controller. The key is stored in `application.properties` under `app.auth.api-key`.
+Requests without this header, or with an incorrect value, receive `401 Unauthorized` before reaching any controller. 
+The environment variable is set as a value of the `app.auth.api-key` property in `application.properties`.
 
 ---
 
@@ -154,7 +156,8 @@ GET /api/v1/cash-balance?cashier=PETER&dateFrom=2025-01-01&dateTo=2025-12-31
 }
 ```
 
-Denominations are sorted ascending by face value. The `cashier`, `dateFrom`, and `dateTo` fields at the top level echo whichever filters were applied (or `null` if omitted).
+Denominations are sorted ascending by face value. The `cashier`, `dateFrom`, and `dateTo` fields at the top level echo 
+whichever filters were applied (or `null` if omitted).
 
 ---
 
@@ -184,7 +187,8 @@ Denominations are sorted ascending by face value. The `cashier`, `dateFrom`, and
 }
 ```
 
-The `violations` array is present only for `400` validation errors. For `422`, `404`, and `500` responses it is omitted entirely.
+The `violations` array is present only for `400` validation errors. For `422`, `404`, and `500` responses it is omitted 
+entirely.
 
 ---
 
